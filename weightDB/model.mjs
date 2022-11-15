@@ -1,8 +1,8 @@
 // Get the mongoose object
 import mongoose from 'mongoose';
-// Prepare to the database nutrition_db in the MongoDB server running locally on port 27017
+// Prepare to the database weight_db in the MongoDB server running locally on port 27017
 mongoose.connect(
-    "mongodb://localhost:27017/nutrition_db",
+    "mongodb://localhost:27017/weight_db",
     { useNewUrlParser: true, useUnifiedTopology: true }
 );
 // Connect to to the database
@@ -14,55 +14,52 @@ db.once("open", () => {
 /**
  * Define the schema
  */
-const nutritionSchema = mongoose.Schema({
+const weightSchema = mongoose.Schema({
     date: { type: String, required: true, min: '2022-09-01', default: '2022-09-01'},
-    foodType: { type: String, required: true },
-    carbohydrate: { type: Number, required: false },
-    fat: { type: Number, required: false },
-    protein: { type: Number, required: false },
-    totalCalories: { type: Number, required: true }
+    weightLbs: { type: Number, required: true },
+    weightChange: { type: Number, required: true },
 });
 /**
  * Compile the model from the schema. This must be done after defining the schema.
  */
-const Meal = mongoose.model("Meal", nutritionSchema);
+const Weight = mongoose.model("Weight", weightSchema);
 
 /**
- * Create a meal
+ * Create a weight entry
  */
- const createMeal = async (date, foodType, carbohydrate, fat, protein, totalCalories) => {
-    // Call the constructor to create an instance of the model class Meal
-    const meal = new Meal({ date: date, foodType: foodType, carbohydrate: carbohydrate, fat: fat, protein: protein, totalCalories: totalCalories });
+ const createWeight = async (date, weightLbs, weightChange) => {
+    // Call the constructor to create an instance of the model class Weight
+    const weight = new Weight({ date: date, weightLbs: weightLbs, weightChange: weightChange });
     // Call save to persist this object as a document in MongoDB
-    return meal.save();
+    return weight.save();
 }
 
 /**
- * Retrieve meals based on the filter, projection and limit parameters
+ * Retrieve weights based on the filter, projection and limit parameters
  */
-const findMeals = async () => {
-    const query = Meal.find()
+const findWeights = async () => {
+    const query = Weight.find()
     return query.exec();
 }
 
 /**
- * Replace the date, food type, carbohydrate, fat, protein, and total calories properties of the meal with the id value provided
+ * Replace the date, weight, amd weight change properties of the entry with the id value provided
  */
-const replaceMeal = async ( {_id, date, foodType, carbohydrate, fat, protein, totalCalories} ) => {
-    const result = await Meal.replaceOne( {_id: _id},
-      { date: date, foodType: foodType, carbohydrate: carbohydrate, fat: fat, protein: protein, totalCalories: totalCalories });
+const replaceWeight = async ( {_id, date, weightLbs, weightChange} ) => {
+    const result = await Weight.replaceOne( {_id: _id},
+      { date: date, weightLbs: weightLbs, weightChange: weightChange });
   
     console.log(result);
     return result.nModified;
 }
 
 /**
- * Delete the meal with provided query
+ * Delete the weight entry with provided query
  */
 const deleteById = async (_id) => {
-    const result = await Meal.deleteOne({ _id : _id } );  
+    const result = await Weight.deleteOne({ _id : _id } );  
     // Return the count of deleted document
     return result.deletedCount;
 }
 
-export { createMeal, findMeals, replaceMeal, deleteById };
+export { createWeight, findWeights, replaceWeight, deleteById };
